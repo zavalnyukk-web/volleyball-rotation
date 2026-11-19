@@ -1,0 +1,32 @@
+{
+  "name": "Волейбол Розстановка",
+  "short_name": "Волейбол",
+  "description": "Розстановка, ротація і захист: схеми 5-1 та 4-2. Розробник: zavalnyuk",
+  "lang": "uk",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1a24",
+  "theme_color": "#0e1a24",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
