@@ -23,6 +23,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Prepare web files
+        run: |
+          mkdir -p www
+          cp index.html manifest.webmanifest sw.js icon-192.png icon-512.png icon-maskable-512.png www/
+
       - name: Install Capacitor
         run: npm install
 
@@ -31,7 +36,23 @@ jobs:
 
       - name: Add app icons
         run: |
-          cp -r android-res/. android/app/src/main/res/
+          pip install pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw
+          import os
+          src = Image.open('icon-512.png').convert('RGBA')
+          for name, s in [('mdpi', 48), ('hdpi', 72), ('xhdpi', 96), ('xxhdpi', 144), ('xxxhdpi', 192)]:
+              d = 'android/app/src/main/res/mipmap-' + name
+              os.makedirs(d, exist_ok=True)
+              img = src.resize((s, s), Image.LANCZOS)
+              img.save(d + '/ic_launcher.png')
+              mask = Image.new('L', (s * 4, s * 4), 0)
+              ImageDraw.Draw(mask).ellipse([0, 0, s * 4 - 1, s * 4 - 1], fill=255)
+              mask = mask.resize((s, s), Image.LANCZOS)
+              out = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+              out.paste(img, (0, 0), mask)
+              out.save(d + '/ic_launcher_round.png')
+          PY
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
       - name: Sync web files
