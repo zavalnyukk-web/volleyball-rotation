@@ -1,0 +1,60 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Capacitor
+        run: npm install
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Add app icons
+        run: |
+          cp -r android-res/. android/app/src/main/res/
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+
+      - name: Sync web files
+        run: npx cap sync android
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk volleyball-rotation.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: volleyball-rotation-apk
+          path: volleyball-rotation.apk
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v1.${{ github.run_number }}" volleyball-rotation.apk \
+            --title "Волейбол Розстановка v1.${{ github.run_number }}" \
+            --notes "Розробник: zavalnyuk. Завантаж volleyball-rotation.apk на телефон і встанови."

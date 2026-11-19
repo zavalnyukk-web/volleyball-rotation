@@ -1,0 +1,8 @@
+{
+  "appId": "ua.zavalnyuk.volleyball",
+  "appName": "Волейбол",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0e1a24"
+  }
+}
