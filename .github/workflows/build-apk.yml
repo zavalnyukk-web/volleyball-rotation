@@ -36,24 +36,49 @@ jobs:
 
       - name: Add app icons
         run: |
-          pip install pillow
+          pip install pillow numpy
           python3 - <<'PY'
-          from PIL import Image, ImageDraw
+          from PIL import Image, ImageDraw, ImageFilter
+          import numpy as np
           import os
-          src = Image.open('icon-512.png').convert('RGBA')
-          for name, s in [('mdpi', 48), ('hdpi', 72), ('xhdpi', 96), ('xxhdpi', 144), ('xxxhdpi', 192)]:
-              d = 'android/app/src/main/res/mipmap-' + name
+          res = 'android/app/src/main/res/'
+          src = Image.open('icon-1024.png' if os.path.exists('icon-1024.png') else 'icon-512.png').convert('RGB')
+          # adaptive layers on a 1024 canvas (= 108dp): blurred background + artwork on top
+          S = 1024
+          z = int(S * 1.4)
+          bg = src.resize((z, z), Image.LANCZOS).crop(((z - S) // 2, (z - S) // 2, (z + S) // 2, (z + S) // 2))
+          bg = bg.filter(ImageFilter.GaussianBlur(S * 0.04))
+          fs = int(S * 0.70)
+          art = src.resize((fs, fs), Image.LANCZOS).convert('RGBA')
+          yy, xx = np.mgrid[0:fs, 0:fs]
+          dist = np.minimum(np.minimum(xx, fs - 1 - xx), np.minimum(yy, fs - 1 - yy))
+          art.putalpha(Image.fromarray((np.clip(dist / (fs * 0.03), 0, 1) * 255).astype('uint8')))
+          fg = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+          fg.paste(art, ((S - fs) // 2, (S - fs) // 2), art)
+          for name, k in [('mdpi', 1), ('hdpi', 1.5), ('xhdpi', 2), ('xxhdpi', 3), ('xxxhdpi', 4)]:
+              d = res + 'mipmap-' + name
               os.makedirs(d, exist_ok=True)
+              s = int(48 * k)
               img = src.resize((s, s), Image.LANCZOS)
               img.save(d + '/ic_launcher.png')
               mask = Image.new('L', (s * 4, s * 4), 0)
               ImageDraw.Draw(mask).ellipse([0, 0, s * 4 - 1, s * 4 - 1], fill=255)
               mask = mask.resize((s, s), Image.LANCZOS)
               out = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-              out.paste(img, (0, 0), mask)
+              out.paste(img.convert('RGBA'), (0, 0), mask)
               out.save(d + '/ic_launcher_round.png')
+              a = int(108 * k)
+              fg.resize((a, a), Image.LANCZOS).save(d + '/ic_launcher_fg.png')
+              bg.resize((a, a), Image.LANCZOS).save(d + '/ic_launcher_bg.png')
+          os.makedirs(res + 'mipmap-anydpi-v26', exist_ok=True)
+          xml = ('<?xml version="1.0" encoding="utf-8"?>\n'
+                 '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+                 '    <background android:drawable="@mipmap/ic_launcher_bg"/>\n'
+                 '    <foreground android:drawable="@mipmap/ic_launcher_fg"/>\n'
+                 '</adaptive-icon>\n')
+          for f in ('ic_launcher.xml', 'ic_launcher_round.xml'):
+              open(res + 'mipmap-anydpi-v26/' + f, 'w').write(xml)
           PY
-          rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
       - name: Sync web files
         run: npx cap sync android
