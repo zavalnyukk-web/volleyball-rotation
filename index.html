@@ -100,7 +100,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--panel); border-top: 1px solid var(--line);
   display: flex; justify-content: center; padding-bottom: env(safe-area-inset-bottom);
 }
-.tabs-in { width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.tabs-in { width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(5, 1fr); }
 .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 60px; border-radius: 0; color: var(--muted); font-size: 12px; font-weight: 600; border-top: 3px solid transparent; }
 .tab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .tab[aria-pressed="true"] { color: var(--accent); border-top-color: var(--accent); background: rgba(255, 183, 3, .06); }
@@ -125,9 +125,25 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
 .hrow .dot { margin-top: 3px; }
 .hrow small { color: var(--muted); display: block; font-size: 12px; }
 .mist { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
-.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.names { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.gbtn { min-height: 34px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--line); font-size: 12px; background: transparent; flex: none; }
+.gbtn[data-g="g"] { background: #c0508a; color: #fff; border-color: #c0508a; }
+.gbtn[data-g="b"] { background: #2f6bd1; color: #fff; border-color: #2f6bd1; }
+.hidden { display: none !important; }
+.banner { order: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--accent); color: #1a1300; border-radius: 12px; padding: 6px 8px 6px 14px; font-weight: 700; font-size: 14px; }
+.banner[hidden] { display: none; }
+.banner button { min-height: 36px; background: rgba(0,0,0,.14); border-radius: 9px; font-size: 13px; color: inherit; }
+.stepbar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; text-align: center; }
+.stepbar b { font-variant-numeric: tabular-nums; padding: 0 6px; }
+.boarding .hide-game { display: none; }
+.prow { display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+.prow .pn { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prow small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.prow button { min-height: 36px; font-size: 13px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; }
+.pname { flex: 1; min-width: 0; font: inherit; font-size: 15px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-height: 44px; padding: 0 12px; }
 .names label { min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 4px 8px; }
 .names label b { min-width: 38px; }
+.names input { min-width: 0; }
 .names input { flex: 1; min-width: 0; font: inherit; font-size: 15px; color: var(--text); background: transparent; border: 0; min-height: 36px; }
 :root { --tabh: 63px; }
 .matchbar { position: fixed; left: 0; right: 0; bottom: calc(var(--tabh) + env(safe-area-inset-bottom)); z-index: 9; background: var(--panel); border-top: 1px solid var(--line); box-shadow: 0 -6px 14px rgba(0, 0, 0, .3); }
@@ -162,6 +178,8 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
       <button type="button" id="libBtn" aria-pressed="false">Ліберо</button>
     </div>
   </div>
+
+  <div class="banner" id="bBanner" hidden><span id="bBannerT"></span><button type="button" id="bBannerExit">Закінчити</button></div>
 
   <div class="court-wrap" id="courtWrap">
     <svg id="court" viewBox="-10 -14 120 138" role="img" aria-label="Волейбольний майданчик, наша половина"></svg>
@@ -260,6 +278,38 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     </div>
   </section>
 
+  <!-- Дошка -->
+  <section class="panel" id="p-board">
+    <p class="note" id="bHelp">Тактична дошка: переставляй гравців пальцем, малюй стрілки руху, додавай кроки, зберігай схему і відтворюй її за потреби.</p>
+    <button type="button" class="btn primary" id="bStart">Почати з поточної розстановки</button>
+    <div id="bTools" class="panel hidden">
+      <div class="seg" id="bMode" role="group" aria-label="Режим дошки">
+        <button type="button" data-bm="move" aria-pressed="true">Рух</button>
+        <button type="button" data-bm="arrow" aria-pressed="false">Стрілки</button>
+      </div>
+      <div class="stepbar">
+        <button type="button" class="btn" id="bPrev" aria-label="Попередній крок">◀</button>
+        <b id="bStepLbl">Крок 1 з 1</b>
+        <button type="button" class="btn" id="bNext" aria-label="Наступний крок">▶</button>
+      </div>
+      <div class="btns">
+        <button type="button" class="btn" id="bAddStep">+ Крок за стрілками</button>
+        <button type="button" class="btn" id="bPlay">▶ Відтворити</button>
+        <button type="button" class="btn" id="bUndoArrow">↶ Прибрати стрілку</button>
+        <button type="button" class="btn" id="bDelStep">Видалити крок</button>
+      </div>
+      <p class="sublabel">Зберегти схему</p>
+      <div class="row" style="flex-wrap:nowrap">
+        <input type="text" class="pname" id="playName" maxlength="40" placeholder="Назва, наприклад «Прийом 5-1»" aria-label="Назва схеми">
+        <button type="button" class="btn" id="bSave" style="min-width:104px">Зберегти</button>
+      </div>
+      <p class="check" id="bMsg" aria-live="polite"></p>
+      <button type="button" class="btn" id="bExit">Закінчити роботу з дошкою</button>
+    </div>
+    <p class="sublabel">Збережені схеми</p>
+    <div id="playList" class="hint-list"></div>
+  </section>
+
   <!-- Гра -->
   <section class="panel" id="p-game">
     <div class="score" aria-live="polite">
@@ -283,7 +333,11 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     <div class="btns">
       <button type="button" class="btn full" id="matchBtn" aria-pressed="false">Увімкнути лічильник очок</button>
     </div>
-    <p class="sublabel">Імена гравців</p>
+    <p class="sublabel">Імена та стать гравців</p>
+    <div class="btns">
+      <button type="button" class="btn" id="gAllB">Усі хлопці</button>
+      <button type="button" class="btn" id="gAllG">Усі дівчата</button>
+    </div>
     <div class="seg" id="nameSeg" role="group" aria-label="Що показувати на гравцях">
       <button type="button" data-nm="role" aria-pressed="true">Позначення</button>
       <button type="button" data-nm="name" aria-pressed="false">Ім’я</button>
@@ -323,6 +377,8 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Підказки</button>
     <button type="button" class="tab" data-tab="view" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Вигляд</button>
+    <button type="button" class="tab" data-tab="board" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Дошка</button>
     <button type="button" class="tab" data-tab="game" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11" r=".9"/><circle cx="18.5" cy="14" r=".9"/></svg>Гра</button>
     <button type="button" class="tab" data-tab="more" aria-pressed="false">
@@ -544,6 +600,17 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
   var names = {};
   try { names = JSON.parse(localStorage.getItem('vb-names') || '{}') || {}; } catch (e) { names = {}; }
   function saveNames() { try { localStorage.setItem('vb-names', JSON.stringify(names)); } catch (e) {} }
+  var genders = {};
+  try { genders = JSON.parse(localStorage.getItem('vb-genders') || '{}') || {}; } catch (e) { genders = {}; }
+  function saveGenders() { try { localStorage.setItem('vb-genders', JSON.stringify(genders)); } catch (e) {} }
+  function genderOf(p) { var k = p.type === 'L' ? 'L' : p.id; return (genders[state.sys] || {})[k] || 'b'; }
+  var HAIR = ['#2b1d14', '#5a3a22', '#c9a04a', '#1a1a1a', '#7a3b1d', '#3b2a1c'];
+  var board = { active: false, mode: 'move', steps: [], cur: 0, playing: false, timer: 0 };
+  var plays = [];
+  try { plays = JSON.parse(localStorage.getItem('vb-plays') || '[]') || []; } catch (e) { plays = []; }
+  function savePlays() { try { localStorage.setItem('vb-plays', JSON.stringify(plays)); } catch (e) {} }
+  function curStep() { return board.steps[board.cur]; }
+  function clonePos(o) { var r = {}; Object.keys(o).forEach(function (k) { r[k] = o[k].slice(); }); return r; }
   var $ = function (id) { return document.getElementById(id); };
   var svg = $('court');
   var cv = $('c3d');
@@ -598,7 +665,6 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
       var c = el('circle', { r: 6.4, 'stroke-width': 1.2, stroke: '#fff' }, g);
       var t = el('text', { x: 0, y: 0.3 }, g);
       var t2 = el('text', { x: 0, y: 9.6, 'class': 'sub2' }, g);
-      g.addEventListener('pointerdown', onDown);
       tokens[b.id] = { g: g, c: c, t: t, t2: t2 };
     });
   }
@@ -670,22 +736,33 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     return { rot: state.rot, phase: state.serving ? 'serve' : 'attack' };
   }
   var arrowData = [];
+  function pushArrow(A, B, col, dashed, fromTok, exact) {
+    var d = Math.hypot(B[0] - A[0], B[1] - A[1]);
+    if (d <= (exact ? 5 : 17)) return;
+    var ux = (B[0] - A[0]) / d, uy = (B[1] - A[1]) / d;
+    arrowData.push({ A: A, B: B, color: col, dash: dashed, exact: exact, from: fromTok });
+    var s0 = fromTok ? 6.8 : 0, e0 = exact ? 0 : 7.4;
+    var sx = A[0] + ux * s0, sy = A[1] + uy * s0, ex = B[0] - ux * e0, ey = B[1] - uy * e0;
+    var hx = ex - ux * 3.4, hy = ey - uy * 3.4, nx = -uy * 2.2, ny = ux * 2.2;
+    el('line', { x1: sx, y1: sy, x2: hx, y2: hy, stroke: '#0b141c', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.55 }, arrowsG);
+    var a2 = { x1: sx, y1: sy, x2: hx, y2: hy, stroke: col, 'stroke-width': 1.7, 'stroke-linecap': 'round' };
+    if (dashed) a2['stroke-dasharray'] = '2.6 1.8';
+    el('line', a2, arrowsG);
+    el('polygon', { points: ex + ',' + ey + ' ' + (hx + nx) + ',' + (hy + ny) + ' ' + (hx - nx) + ',' + (hy - ny), fill: col, stroke: '#0b141c', 'stroke-width': 0.5 }, arrowsG);
+  }
   function updateArrows() {
     arrowData = [];
     while (arrowsG.firstChild) arrowsG.removeChild(arrowsG.firstChild);
+    if (board.active) {
+      var typ = {}; lineup().forEach(function (p) { typ[p.id] = p.type; });
+      curStep().arrows.forEach(function (a) {
+        pushArrow([a.x1, a.y1], [a.x2, a.y2], a.id ? COLORS[typ[a.id] || 'H'].fill : '#ffffff', !a.id, !!a.id, true);
+      });
+      return;
+    }
     if (!state.arrows || game.active) return;
     var pi = prevInfo(), a = phasePos(pi.rot, pi.phase), b = logicalPositions();
-    lineup().forEach(function (p) {
-      var A = a[p.id], B = b[p.id], d = Math.hypot(B[0] - A[0], B[1] - A[1]);
-      if (d <= 17) return;
-      var ux = (B[0] - A[0]) / d, uy = (B[1] - A[1]) / d, col = COLORS[p.type].fill;
-      arrowData.push({ A: A, B: B, color: col });
-      var sx = A[0] + ux * 6.8, sy = A[1] + uy * 6.8, ex = B[0] - ux * 7.4, ey = B[1] - uy * 7.4;
-      var hx = ex - ux * 3.2, hy = ey - uy * 3.2, nx = -uy * 2.1, ny = ux * 2.1;
-      el('line', { x1: sx, y1: sy, x2: hx, y2: hy, stroke: '#0b141c', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.55 }, arrowsG);
-      el('line', { x1: sx, y1: sy, x2: hx, y2: hy, stroke: col, 'stroke-width': 1.7, 'stroke-linecap': 'round' }, arrowsG);
-      el('polygon', { points: ex + ',' + ey + ' ' + (hx + nx) + ',' + (hy + ny) + ' ' + (hx - nx) + ',' + (hy - ny), fill: col, stroke: '#0b141c', 'stroke-width': 0.5 }, arrowsG);
-    });
+    lineup().forEach(function (p) { pushArrow(a[p.id], b[p.id], COLORS[p.type].fill, false, true, false); });
   }
   var replayTimer = 0;
   function replay() {
@@ -697,7 +774,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     replayTimer = setTimeout(function () { setTargets(shownPositions(), false); }, 650);
   }
   function key() { return state.sys + '|' + state.rot + '|' + state.phase; }
-  function shownPositions() { return game.active ? game.pos : logicalPositions(); }
+  function shownPositions() { return board.active ? curStep().pos : game.active ? game.pos : logicalPositions(); }
 
   // Найближчий гравець для кожної клітинки (зони відповідальності)
   function owners(ps, n, cell) {
@@ -833,10 +910,10 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     arrowData.forEach(function (a) {
       var ax = a.A[0] * M, ay = a.A[1] * M, bx = a.B[0] * M, by = a.B[1] * M;
       var d = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / d, uy = (by - ay) / d;
-      var sx = ax + ux * 0.6, sy = ay + uy * 0.6, ex = bx - ux * 0.65, ey = by - uy * 0.65;
-      var hx = ex - ux * 0.38, hy = ey - uy * 0.38, nx = -uy * 0.2, ny = ux * 0.2;
+      var sx = ax + (a.from ? ux * 0.6 : 0), sy = ay + (a.from ? uy * 0.6 : 0), ex = bx - (a.exact ? 0 : ux * 0.65), ey = by - (a.exact ? 0 : uy * 0.65);
+      var hx = ex - ux * 0.4, hy = ey - uy * 0.4, nx = -uy * 0.21, ny = ux * 0.21;
       seg([sx, sy, 0.02], [hx, hy, 0.02], 'rgba(8,14,22,.6)', 5);
-      seg([sx, sy, 0.02], [hx, hy, 0.02], a.color, 3);
+      seg([sx, sy, 0.02], [hx, hy, 0.02], a.color, 3, a.dash ? 7 : 0);
       poly([[ex, ey, 0.02], [hx + nx, hy + ny, 0.02], [hx - nx, hy - ny, 0.02]], a.color);
     });
     // зона подачі
@@ -856,10 +933,10 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     if (!netAfter) drawNet();
 
     // гравці
-    var items = ps.map(function (p) {
+    var items = ps.map(function (p, idx) {
       var c = cur[p.id]; if (!c) return null;
       var X = c[0] * M, Y = c[1] * M;
-      return { p: p, X: X, Y: Y, w: proj(X, Y, 0)[2] };
+      return { p: p, X: X, Y: Y, idx: idx, w: proj(X, Y, 0)[2] };
     }).filter(Boolean).sort(function (a, b) { return b.w - a.w; });
 
     function dim(it) { ctx.globalAlpha = state.me && state.me !== it.p.id ? 0.38 : 1; }
@@ -905,17 +982,49 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     }
     function figure(it) {
       var f = proj(it.X, it.Y, 0), top = proj(it.X, it.Y, 1.75), k = f[3] * S3;
-      function at(z, dx) { var t = z / 1.75; return [f[0] + (top[0] - f[0]) * t + dx * k, f[1] + (top[1] - f[1]) * t]; }
+      var girl = genderOf(it.p) === 'g', hs = girl ? 0.96 : 1;
+      function at(z, dx) { var q = z * hs / 1.75; return [f[0] + (top[0] - f[0]) * q + dx * k, f[1] + (top[1] - f[1]) * q]; }
       function ln(a, b, color, w) { ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
-      var col = COLORS[it.p.type].fill, skin = '#f1c9a5';
-      ln(at(0, -0.12), at(0.9, -0.1), '#18283a', 0.15 * k);
-      ln(at(0, 0.12), at(0.9, 0.1), '#18283a', 0.15 * k);
-      ln(at(0.82, 0), at(1.5, 0), 'rgba(10,18,28,.85)', 0.58 * k);
-      ln(at(0.82, 0), at(1.5, 0), col, 0.5 * k);
-      ln(at(1.45, -0.27), at(1.0, -0.4), skin, 0.1 * k);
-      ln(at(1.45, 0.27), at(1.0, 0.4), skin, 0.1 * k);
-      var h = at(1.68, 0);
-      ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(h[0], h[1], 0.14 * k, 0, 7); ctx.fill();
+      function dot(a, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(a[0], a[1], r, 0, 7); ctx.fill(); }
+      function oval(a, rx, ry, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(a[0], a[1], rx, ry, 0, 0, 7); ctx.fill(); }
+      var col = COLORS[it.p.type].fill, skin = '#efc3a0', shorts = '#141d29', back = Math.abs(yawN) <= 90;
+      var hair = HAIR[it.idx % HAIR.length];
+      var hw = girl ? 0.16 : 0.19, sw = girl ? 0.2 : 0.25;
+      // ноги: гетри, кросівки, наколінники, шорти
+      [-1, 1].forEach(function (s) {
+        var hip = at(0.72, s * (hw - 0.05)), knee = at(0.5, s * 0.15), ank = at(0.12, s * 0.15);
+        ln(hip, knee, skin, 0.115 * k); ln(knee, ank, skin, 0.1 * k);
+        ln(at(0.3, s * 0.15), ank, '#f4f6f8', 0.115 * k);
+        dot(knee, 0.062 * k, '#2a3646');
+        oval(at(0.0, s * 0.165), 0.125 * k, 0.03 * k, col);
+        oval(at(0.04, s * 0.165), 0.125 * k, 0.062 * k, '#f8fafc');
+        ln(at(0.98, s * (hw - 0.04)), at(0.66, s * hw), shorts, 0.21 * k);
+      });
+      // футболка: трапеція від стегон до плечей
+      var shL = at(1.5, -sw), shR = at(1.5, sw), hpL = at(0.93, -hw), hpR = at(0.93, hw);
+      ctx.beginPath(); ctx.moveTo(hpL[0], hpL[1]); ctx.lineTo(hpR[0], hpR[1]); ctx.lineTo(shR[0], shR[1]); ctx.lineTo(shL[0], shL[1]); ctx.closePath();
+      ctx.fillStyle = col; ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = Math.max(1, 0.03 * k); ctx.lineJoin = 'round'; ctx.stroke();
+      ln(at(0.97, -hw + 0.02), at(0.97, hw - 0.02), 'rgba(255,255,255,.75)', 0.05 * k);
+      // короткі рукави і руки
+      [-1, 1].forEach(function (s) {
+        var sh = at(1.47, s * sw), elb = at(1.3, s * (sw + 0.1)), hand = at(1.02, s * (sw + 0.14));
+        ln(elb, hand, skin, 0.095 * k); dot(hand, 0.05 * k, skin);
+        ln(sh, elb, col, 0.17 * k);
+        ln(at(1.33, s * (sw + 0.085)), at(1.31, s * (sw + 0.1)), 'rgba(255,255,255,.85)', 0.17 * k);
+      });
+      // шия і голова
+      var h = at(1.7, 0), r = 0.13 * k;
+      ln(at(1.5, 0), at(1.6, 0), skin, 0.1 * k);
+      if (girl && back) { oval([h[0], h[1] + r * 1.55], 0.055 * k, 0.17 * k, hair); dot([h[0], h[1] + r * 0.95], 0.03 * k, '#ffffff'); }
+      dot(h, r, back ? hair : skin);
+      if (!back) {
+        ctx.fillStyle = hair; ctx.beginPath(); ctx.arc(h[0], h[1] - r * 0.05, r * 1.06, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill();
+        if (girl) { oval([h[0] + r * 1.25, h[1] + r * 0.55], 0.05 * k, 0.15 * k, hair); dot([h[0] + r * 1.05, h[1] - r * 0.15], 0.03 * k, '#ffffff'); }
+        if (r > 4) { dot([h[0] - r * 0.38, h[1] + r * 0.15], r * 0.11, '#1b2430'); dot([h[0] + r * 0.38, h[1] + r * 0.15], r * 0.11, '#1b2430'); }
+      } else if (!girl) {
+        ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.beginPath(); ctx.arc(h[0] - r * 0.3, h[1] - r * 0.3, r * 0.45, 0, 7); ctx.fill();
+      }
       if (state.names) {
         var lp = at(2.12, 0), fs = Math.max(9 * dpr, Math.min(15 * dpr, 0.2 * k)) * (state.big ? 1.15 : 1), lab = pillLabel(it.p);
         ctx.font = '700 ' + fs + 'px system-ui, sans-serif';
@@ -1012,6 +1121,43 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     list.forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ul.appendChild(li); });
   }
 
+  function renderBoard() {
+    $('bBanner').hidden = !board.active;
+    $('bTools').classList.toggle('hidden', !board.active);
+    $('bStart').classList.toggle('hidden', board.active);
+    if (board.active) {
+      var st = curStep();
+      $('bBannerT').textContent = 'Тактична дошка · крок ' + (board.cur + 1) + ' з ' + board.steps.length;
+      $('bStepLbl').textContent = 'Крок ' + (board.cur + 1) + ' з ' + board.steps.length;
+      Array.prototype.forEach.call(document.querySelectorAll('#bMode button'), function (b) {
+        b.setAttribute('aria-pressed', b.dataset.bm === board.mode ? 'true' : 'false');
+      });
+      $('bPrev').disabled = board.cur === 0;
+      $('bNext').disabled = board.cur >= board.steps.length - 1;
+      $('bUndoArrow').disabled = !st.arrows.length;
+      $('bAddStep').disabled = !st.arrows.some(function (a) { return a.id; });
+      $('bDelStep').disabled = board.steps.length < 2;
+      $('bPlay').textContent = board.playing ? '❚❚ Стоп' : '▶ Відтворити';
+      $('bHelp').textContent = board.mode === 'move'
+        ? 'Режим «Рух»: перетягуй гравців пальцем на потрібні місця.'
+        : 'Режим «Стрілки»: проведи пальцем від гравця до місця, куди він має піти. Від порожнього місця малюється пунктирна стрілка м’яча. Потім натисни «+ Крок за стрілками», і гравці перейдуть на нові місця.';
+    } else {
+      $('bHelp').textContent = 'Тактична дошка: переставляй гравців пальцем, малюй стрілки руху, додавай кроки, зберігай схему і відтворюй її за потреби.';
+    }
+    var pl = $('playList'); pl.innerHTML = '';
+    if (!plays.length) {
+      var em = document.createElement('p'); em.className = 'note'; em.style.color = 'var(--muted)'; em.textContent = 'Поки що немає збережених схем.'; pl.appendChild(em);
+    }
+    plays.forEach(function (pp) {
+      var row = document.createElement('div'); row.className = 'prow';
+      var nmEl = document.createElement('div'); nmEl.className = 'pn'; nmEl.textContent = pp.name;
+      var sm = document.createElement('small'); sm.textContent = pp.sys + ' · кроків: ' + pp.steps.length; nmEl.appendChild(sm);
+      var ob = document.createElement('button'); ob.type = 'button'; ob.dataset.open = pp.id; ob.textContent = 'Відкрити';
+      var db = document.createElement('button'); db.type = 'button'; db.dataset.del = pp.id; db.textContent = 'Видалити'; db.setAttribute('aria-label', 'Видалити схему ' + pp.name);
+      row.appendChild(nmEl); row.appendChild(ob); row.appendChild(db); pl.appendChild(row);
+    });
+  }
+
   function buildNames() {
     var nl = $('namesList'); nl.innerHTML = '';
     var rows = VB.SYSTEMS[state.sys].map(function (b) { return { id: b.id, label: b.label }; }).concat([{ id: 'L', label: 'Л' }]);
@@ -1026,7 +1172,20 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
         names[state.sys] = names[state.sys] || {}; names[state.sys][r.id] = inp.value; saveNames();
         renderUI(); schedule();
       });
-      lab.appendChild(bb); lab.appendChild(inp); nl.appendChild(lab);
+      var gb = document.createElement('button');
+      gb.type = 'button'; gb.className = 'gbtn';
+      var paintG = function () {
+        var g = (genders[state.sys] || {})[r.id] || 'b';
+        gb.dataset.g = g; gb.textContent = g === 'g' ? 'Дівчина' : 'Хлопець';
+        gb.setAttribute('aria-label', 'Стать для позиції ' + r.label + ': ' + gb.textContent);
+      };
+      paintG();
+      gb.addEventListener('click', function () {
+        genders[state.sys] = genders[state.sys] || {};
+        genders[state.sys][r.id] = ((genders[state.sys][r.id] || 'b') === 'g') ? 'b' : 'g';
+        saveGenders(); paintG(); schedule();
+      });
+      lab.appendChild(bb); lab.appendChild(inp); lab.appendChild(gb); nl.appendChild(lab);
     });
   }
 
@@ -1036,8 +1195,9 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     app.classList.toggle('v3d', state.view === '3d');
     app.classList.toggle('vboth', state.view === 'both');
     app.classList.toggle('gaming', game.active);
-    app.classList.toggle('ord', state.tab === 'view' || state.tab === 'game');
-    app.classList.toggle('stick', (state.tab === 'view' || state.tab === 'game' || state.big) && state.view !== 'both');
+    app.classList.toggle('ord', state.tab === 'view' || state.tab === 'game' || state.tab === 'board');
+    app.classList.toggle('boarding', board.active);
+    app.classList.toggle('stick', (state.tab === 'view' || state.tab === 'game' || state.tab === 'board' || state.big) && state.view !== 'both');
     app.classList.toggle('big', state.big);
     app.classList.toggle('mb', match.on);
     document.documentElement.setAttribute('data-theme', state.theme);
@@ -1083,7 +1243,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
       b.setAttribute('aria-pressed', b.dataset.tab === state.tab ? 'true' : 'false');
     });
-    ['hints', 'view', 'game', 'more'].forEach(function (t) { $('p-' + t).classList.toggle('on', state.tab === t); });
+    ['hints', 'view', 'board', 'game', 'more'].forEach(function (t) { $('p-' + t).classList.toggle('on', state.tab === t); });
     Array.prototype.forEach.call(document.querySelectorAll('#subSeg button'), function (b) {
       b.setAttribute('aria-pressed', b.dataset.sub === state.sub ? 'true' : 'false');
     });
@@ -1112,6 +1272,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     $('mNote').textContent = match.note;
     $('mUndo').disabled = !match.hist.length;
     renderHints(ps);
+    renderBoard();
     $('camPitch').value = state.cam.pitch; $('camPitchO').textContent = Math.round(state.cam.pitch) + '°';
     $('camYaw').value = state.cam.yaw; $('camYawO').textContent = Math.round(state.cam.yaw) + '°';
     $('camZoom').value = state.cam.zoom; $('camZoomO').textContent = '×' + (+state.cam.zoom).toFixed(2).replace(/0$/, '');
@@ -1161,7 +1322,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
 
   $('sysSeg').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    stopAuto(); exitGame(true);
+    stopAuto(); exitGame(true); exitBoard(true);
     state.sys = b.dataset.sys; state.me = null; buildTokens(); buildNames(); render(true);
   });
   $('srvSeg').addEventListener('click', function (e) {
@@ -1203,11 +1364,94 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     state.me = b.dataset.me && state.me !== b.dataset.me ? b.dataset.me : null; renderUI(); schedule();
   });
 
+  /* ---------- Тактична дошка ---------- */
+  function stopPlay() { board.playing = false; clearTimeout(board.timer); }
+  function startBoard() {
+    stopAuto(); exitGame(true); state.edit = false;
+    board.active = true; board.mode = 'move'; board.cur = 0;
+    board.steps = [{ pos: clonePos(logicalPositions()), arrows: [] }];
+    $('bMsg').textContent = ''; render();
+  }
+  function exitBoard(silent) {
+    if (!board.active) return;
+    stopPlay(); board.active = false; board.steps = []; board.cur = 0;
+    while (ghostsG.firstChild) ghostsG.removeChild(ghostsG.firstChild);
+    if (!silent) render();
+  }
+  function gotoStep(n) { stopPlay(); board.cur = Math.max(0, Math.min(board.steps.length - 1, n)); render(); }
+  $('bStart').addEventListener('click', startBoard);
+  $('bExit').addEventListener('click', function () { exitBoard(false); });
+  $('bBannerExit').addEventListener('click', function () { exitBoard(false); });
+  $('bMode').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    stopPlay(); board.mode = b.dataset.bm; renderUI();
+  });
+  $('bPrev').addEventListener('click', function () { gotoStep(board.cur - 1); });
+  $('bNext').addEventListener('click', function () { gotoStep(board.cur + 1); });
+  $('bUndoArrow').addEventListener('click', function () { curStep().arrows.pop(); updateArrows(); renderUI(); schedule(); });
+  $('bAddStep').addEventListener('click', function () {
+    stopPlay();
+    var st = curStep(), pos = clonePos(st.pos);
+    st.arrows.forEach(function (a) { if (a.id) pos[a.id] = [a.x2, a.y2]; });
+    board.steps.splice(board.cur + 1, 0, { pos: pos, arrows: [] });
+    board.cur++; render();
+  });
+  $('bDelStep').addEventListener('click', function () {
+    if (board.steps.length < 2) return;
+    stopPlay(); board.steps.splice(board.cur, 1); board.cur = Math.max(0, board.cur - 1); render();
+  });
+  $('bPlay').addEventListener('click', function () {
+    if (board.playing) { stopPlay(); renderUI(); return; }
+    if (board.steps.length < 2) { $('bMsg').className = 'check bad'; $('bMsg').textContent = 'Додай хоча б один крок: намалюй стрілки і натисни «+ Крок за стрілками».'; return; }
+    $('bMsg').textContent = '';
+    board.playing = true; board.cur = 0; render();
+    (function next() {
+      board.timer = setTimeout(function () {
+        if (!board.playing) return;
+        if (board.cur >= board.steps.length - 1) { stopPlay(); renderUI(); return; }
+        board.cur++; render(); next();
+      }, 1900);
+    })();
+  });
+  $('bSave').addEventListener('click', function () {
+    var nameV = ($('playName').value || '').trim() || ('Схема ' + (plays.length + 1));
+    plays.push({
+      id: Date.now(), name: nameV, sys: state.sys, rot: state.rot, phase: state.phase, serving: state.serving, libero: state.libero,
+      steps: board.steps.map(function (s) { return { pos: clonePos(s.pos), arrows: s.arrows.map(function (a) { return { id: a.id, x1: a.x1, y1: a.y1, x2: a.x2, y2: a.y2 }; }) }; })
+    });
+    savePlays(); $('playName').value = '';
+    $('bMsg').className = 'check ok'; $('bMsg').textContent = '✓ Схему «' + nameV + '» збережено'; renderUI();
+  });
+  $('playList').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.del) {
+      plays = plays.filter(function (pp) { return String(pp.id) !== b.dataset.del; }); savePlays(); renderUI(); return;
+    }
+    if (b.dataset.open) {
+      var pp = plays.filter(function (x) { return String(x.id) === b.dataset.open; })[0]; if (!pp) return;
+      stopAuto(); exitGame(true); stopPlay(); state.edit = false;
+      if (pp.sys !== state.sys) { state.sys = pp.sys; state.me = null; buildTokens(); buildNames(); }
+      state.rot = pp.rot; state.phase = pp.phase; state.serving = pp.serving; state.libero = pp.libero;
+      board.steps = pp.steps.map(function (s) { return { pos: clonePos(s.pos), arrows: s.arrows.map(function (a) { return { id: a.id, x1: a.x1, y1: a.y1, x2: a.x2, y2: a.y2 }; }) }; });
+      board.active = true; board.mode = 'move'; board.cur = 0;
+      $('playName').value = pp.name; $('bMsg').textContent = '';
+      render(true);
+    }
+  });
+  $('gAllB').addEventListener('click', function () { setAllGender('b'); });
+  $('gAllG').addEventListener('click', function () { setAllGender('g'); });
+  function setAllGender(g) {
+    genders[state.sys] = {};
+    VB.SYSTEMS[state.sys].forEach(function (b) { genders[state.sys][b.id] = g; });
+    genders[state.sys].L = g;
+    saveGenders(); buildNames(); schedule();
+  }
+
   /* ---------- Лічильник очок ---------- */
   function applyMatch(kind) {
     match.hist.push({ us: match.us, them: match.them, serving: state.serving, rot: state.rot, phase: state.phase });
     if (match.hist.length > 60) match.hist.shift();
-    stopAuto(); exitGame(true);
+    stopAuto(); exitGame(true); exitBoard(true);
     if (kind === 'us') {
       match.us++;
       if (state.serving) match.note = 'Очко на нашій подачі. Ротації немає, подаємо далі.';
@@ -1238,7 +1482,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
   $('tabs').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     state.tab = b.dataset.tab; renderUI();
-    var target = (state.tab === 'view' || state.tab === 'game') ? $('courtWrap') : $('p-' + state.tab);
+    var target = (state.tab === 'view' || state.tab === 'game' || state.tab === 'board') ? $('courtWrap') : $('p-' + state.tab);
     window.scrollTo({ top: Math.max(0, target.offsetTop - 12), behavior: reduceMotion ? 'auto' : 'smooth' });
   });
   $('subSeg').addEventListener('click', function (e) {
@@ -1274,30 +1518,76 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
     var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   }
-  function canDrag() { return game.active || (state.edit && state.phase !== 'start'); }
-  function onDown(e) {
+  function canDrag() { return game.active || (board.active && board.mode === 'move') || (state.edit && state.phase !== 'start'); }
+  function hitToken(p) {
+    var best = null, bd = 9.5;
+    lineup().forEach(function (pl) {
+      var c = cur[pl.id]; if (!c) return;
+      var d = Math.hypot(c[0] - p.x, c[1] - p.y);
+      if (d < bd) { bd = d; best = pl.id; }
+    });
+    return best;
+  }
+  var arr = null;
+  function previewArrow(p) {
+    while (ghostsG.firstChild) ghostsG.removeChild(ghostsG.firstChild);
+    var A = [arr.x1, arr.y1], d = Math.hypot(p.x - A[0], p.y - A[1]);
+    if (d < 4) return;
+    var ux = (p.x - A[0]) / d, uy = (p.y - A[1]) / d, hx = p.x - ux * 3.4, hy = p.y - uy * 3.4, nx = -uy * 2.2, ny = ux * 2.2;
+    el('line', { x1: A[0], y1: A[1], x2: hx, y2: hy, stroke: '#ffb703', 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-dasharray': '2.6 1.8' }, ghostsG);
+    el('polygon', { points: p.x + ',' + p.y + ' ' + (hx + nx) + ',' + (hy + ny) + ' ' + (hx - nx) + ',' + (hy - ny), fill: '#ffb703' }, ghostsG);
+  }
+  function onSvgDown(e) {
+    if (board.active && board.mode === 'arrow') {
+      stopPlay(); settle();
+      var p = toSvg(e), hit = hitToken(p);
+      arr = { id: hit, x1: hit ? cur[hit][0] : p.x, y1: hit ? cur[hit][1] : p.y };
+      try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault(); return;
+    }
     if (!canDrag()) { if (state.edit) renderUI(); return; }
-    stopAuto(); settle();
-    var g = e.currentTarget;
-    drag = { id: g.getAttribute('data-id') };
+    var h2 = hitToken(toSvg(e)); if (!h2) return;
+    stopAuto(); stopPlay(); settle();
+    drag = { id: h2 };
     try { svg.setPointerCapture(e.pointerId); } catch (err) {}
     e.preventDefault();
   }
+  svg.addEventListener('pointerdown', onSvgDown);
   svg.addEventListener('pointermove', function (e) {
+    if (arr) { previewArrow(toSvg(e)); return; }
     if (!drag) return;
     var p = toSvg(e);
     var x = Math.round(Math.max(-4, Math.min(104, p.x)) * 2) / 2, y = Math.round(Math.max(-4, Math.min(120, p.y)) * 2) / 2;
-    if (game.active) {
+    if (board.active) {
+      curStep().pos[drag.id] = [x, y];
+    } else if (game.active) {
       game.pos[drag.id] = [x, y];
       if (game.checked) clearResults();
     } else {
       var k = key(); overrides[k] = overrides[k] || {}; overrides[k][drag.id] = [x, y];
     }
     cur[drag.id] = [x, y]; tgt[drag.id] = [x, y]; from[drag.id] = [x, y];
-    if (!game.active) updateCheck(lineup());
+    if (!game.active && !board.active) updateCheck(lineup());
     schedule();
   });
-  function endDrag() { if (!drag) return; drag = null; saveOverrides(); if (state.arrows) updateArrows(); }
+  function endDrag(e) {
+    if (arr) {
+      var a = arr; arr = null;
+      while (ghostsG.firstChild) ghostsG.removeChild(ghostsG.firstChild);
+      if (e && e.type === 'pointerup') {
+        var p = toSvg(e);
+        if (Math.hypot(p.x - a.x1, p.y - a.y1) > 7) {
+          var x2 = Math.round(Math.max(-4, Math.min(104, p.x)) * 2) / 2, y2 = Math.round(Math.max(-4, Math.min(120, p.y)) * 2) / 2;
+          curStep().arrows.push({ id: a.id, x1: a.x1, y1: a.y1, x2: x2, y2: y2 });
+        }
+      }
+      updateArrows(); renderUI(); schedule(); return;
+    }
+    if (!drag) return;
+    drag = null; saveOverrides();
+    if (state.arrows || board.active) updateArrows();
+    if (board.active) renderUI();
+  }
   svg.addEventListener('pointerup', endDrag);
   svg.addEventListener('pointercancel', endDrag);
 
@@ -1348,7 +1638,7 @@ details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--m
   function rnd(n) { return Math.floor(Math.random() * n); }
 
   function newTask() {
-    stopAuto(); state.edit = false;
+    stopAuto(); exitBoard(true); state.edit = false;
     var rot = rnd(6), kind = Math.random() < 0.3 ? 'rotate' : 'phase', task;
     if (kind === 'rotate') {
       var next = (rot + 1) % 6;
